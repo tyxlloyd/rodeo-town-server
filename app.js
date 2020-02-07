@@ -23,7 +23,8 @@ io.on('connection', socket => {
         }
         else{
           var selectedRequest = queue.shift();
-          io.to(request).emit('ride request', 'You have a new ride request: latitude: ' + selectedRequest.lat + '\nlongitude: ' + selectedRequest.long + '\nid: ' + selectedRequest.id);
+          //io.to(request).emit('ride request', 'You have a new ride request: latitude: ' + selectedRequest.lat + '\nlongitude: ' + selectedRequest.long + '\nid: ' + selectedRequest.id);
+          io.to(request).emit('ride request', selectedRequest);
           io.to(selectedRequest.id).emit('confirmation', "Your taxi is on the way!");
           console.log("Requests in queue after shift: " + queue.length);
         }
