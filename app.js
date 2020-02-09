@@ -9,11 +9,11 @@ var queue = [];
 
 io.on('connection', socket => {
     console.log('made socket connection');
-    io.emit('queue size', queue.length);
+    //io.emit('queue size', queue.length);
     socket.on('ride request', request => {
         queue.push(request);
         console.log("Requests in queue: " + queue.length);
-        io.emit('queue size', queue.length);
+        //io.emit('queue size', queue.length);
     }),
     
     socket.on('customer request', request => {
