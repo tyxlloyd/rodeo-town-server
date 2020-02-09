@@ -23,17 +23,16 @@ io.on('connection', socket => {
         }
         else{
           var selectedRequest = queue.shift();
-          //io.to(request).emit('ride request', 'You have a new ride request: latitude: ' + selectedRequest.lat + '\nlongitude: ' + selectedRequest.long + '\nid: ' + selectedRequest.id);
           io.to(request).emit('ride request', selectedRequest);
           io.to(selectedRequest.id).emit('confirmation', "Your taxi is on the way!");
           console.log("Requests in queue after shift: " + queue.length);
         }
     }),
-	socket.on("get queue size", request => {
+	socket.on('get queue size', request => {
 		console.log("Someone has requested the queue size.");
-		io.to(request).emit("queue size", queue.length);
-	}),
-  });
+		io.to(request).emit('queue size', queue.length);
+	})
+});
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
