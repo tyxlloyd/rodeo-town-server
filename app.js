@@ -9,11 +9,11 @@ var queue = [];
 
 io.on('connection', socket => {
     console.log('made socket connection');
-    io.emit('queue size', queue.length);
+    //io.emit('queue size', queue.length);
     socket.on('ride request', request => {
         queue.push(request);
         console.log("Requests in queue: " + queue.length);
-        io.emit('queue size', queue.length);
+        //io.emit('queue size', queue.length);
     }),
     
     socket.on('customer request', request => {
@@ -28,7 +28,11 @@ io.on('connection', socket => {
           io.to(selectedRequest.id).emit('confirmation', "Your taxi is on the way!");
           console.log("Requests in queue after shift: " + queue.length);
         }
-    })
+    }),
+	socket.on("get queue size", request => {
+		console.log("Someone has requested the queue size.");
+		io.to(request).emit("queue size", queue.length);
+	}),
   });
 
 const PORT = process.env.PORT || 8080;
