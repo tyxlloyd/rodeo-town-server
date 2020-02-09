@@ -28,7 +28,11 @@ io.on('connection', socket => {
           io.to(selectedRequest.id).emit('confirmation', "Your taxi is on the way!");
           console.log("Requests in queue after shift: " + queue.length);
         }
-    })
+    }),
+	socket.on("get queue size", request => {
+		console.log("Someone has requested the queue size.");
+		io.to(request).emit("queue size", queue.length);
+	}),
   });
 
 const PORT = process.env.PORT || 8080;
