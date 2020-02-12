@@ -24,13 +24,33 @@ io.on('connection', socket => {
         else{
           var selectedRequest = queue.shift();
           io.to(request).emit('ride request', selectedRequest);
-          io.to(selectedRequest.id).emit('confirmation', "Your taxi is on the way!");
+          var response = {
+            message: "Your taxi is on the way!",
+            driverID: request,
+          }
+          io.to(selectedRequest.id).emit('confirmation', response);
           console.log("Requests in queue after shift: " + queue.length);
         }
     }),
 	socket.on('get queue size', request => {
 		console.log("Someone has requested the queue size.");
 		io.to(request).emit('queue size', queue.length);
+  }),
+
+  socket.on('get driver location', request => {
+		io.to(request.driverID).emit('request driver location', request.customerID);
+  }),
+  
+  socket.on('get customer location', request => {
+		io.to(request.customerID).emit('request customer location', request.driverID);
+  }),
+  
+  socket.on('recieve driver location', request => {
+		io.to(request.customerID).emit('recieve driver location', request.driverLocation);
+  }),
+  
+  socket.on('recieve customer location', request => {
+		io.to(request.driverID).emit('recieve customer location', request.customerLocation);
 	})
 });
 
