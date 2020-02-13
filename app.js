@@ -10,12 +10,12 @@ var queue = [];
 io.on('connection', socket => {
     console.log('made socket connection');
     //io.emit('queue size', queue.length);
+    
     socket.on('ride request', request => {
         queue.push(request);
         console.log("Requests in queue: " + queue.length);
         //io.emit('queue size', queue.length);
     }),
-    
     socket.on('customer request', request => {
         console.log("A driver has requested a customer");
         if(queue.length == 0){
@@ -51,6 +51,10 @@ io.on('connection', socket => {
   
   socket.on('recieve customer location', request => {
 		io.to(request.driverID).emit('recieve customer location', request.customerLocation);
+  }),
+  
+  socket.on('cancel ride request', request => {
+		io.to(request).emit('cancel ride', "Your customer has cancelled their ride request!");
 	})
 });
 
