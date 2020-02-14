@@ -10,6 +10,10 @@ var queue = [];
 io.on('connection', socket => {
     console.log('made socket connection');
     //io.emit('queue size', queue.length);
+
+    socket.on('disconnect', function() {
+      console.log('Got disconnect!');
+    }),
     
     socket.on('ride request', request => {
         queue.push(request);
@@ -17,12 +21,25 @@ io.on('connection', socket => {
         //io.emit('queue size', queue.length);
     }),
     socket.on('customer request', request => {
+        var socketList = io.sockets.server.eio.clients;
+        var requestFound = false;
+        var selectedRequest = null;
+
         console.log("A driver has requested a customer");
-        if(queue.length == 0){
+        while(!requestFound && queue.length > 0){
+          selectedRequest = queue.shift();
+          if (!(socketList[selectedRequest.id] === undefined)){
+            requestFound = true;
+          }
+          else{
+            console.log("Removed request from disconnected user");
+          }
+        }
+
+        if(queue.length == 0 && !requestFound){
           io.to(request).emit('error', "There aren't any customers waiting. Try again in a bit");
         }
         else{
-          var selectedRequest = queue.shift();
           io.to(request).emit('ride request', selectedRequest);
           var response = {
             message: "Your taxi is on the way!",
@@ -32,30 +49,31 @@ io.on('connection', socket => {
           console.log("Requests in queue after shift: " + queue.length);
         }
     }),
-	socket.on('get queue size', request => {
-		console.log("Someone has requested the queue size.");
-		io.to(request).emit('queue size', queue.length);
-  }),
+    
+    socket.on('get queue size', request => {
+      console.log("Someone has requested the queue size.");
+      io.to(request).emit('queue size', queue.length);
+    }),
 
-  socket.on('get driver location', request => {
-		io.to(request.driverID).emit('request driver location', request.customerID);
-  }),
-  
-  socket.on('get customer location', request => {
-		io.to(request.customerID).emit('request customer location', request.driverID);
-  }),
-  
-  socket.on('recieve driver location', request => {
-		io.to(request.customerID).emit('recieve driver location', request.driverLocation);
-  }),
-  
-  socket.on('recieve customer location', request => {
-		io.to(request.driverID).emit('recieve customer location', request.customerLocation);
-  }),
-  
-  socket.on('cancel ride request', request => {
-		io.to(request).emit('cancel ride', "Your customer has cancelled their ride request!");
-	})
+    socket.on('get driver location', request => {
+      io.to(request.driverID).emit('request driver location', request.customerID);
+    }),
+    
+    socket.on('get customer location', request => {
+      io.to(request.customerID).emit('request customer location', request.driverID);
+    }),
+    
+    socket.on('recieve driver location', request => {
+      io.to(request.customerID).emit('recieve driver location', request.driverLocation);
+    }),
+    
+    socket.on('recieve customer location', request => {
+      io.to(request.driverID).emit('recieve customer location', request.customerLocation);
+    }),
+    
+    socket.on('cancel ride request', request => {
+      io.to(request).emit('cancel ride', "Your customer has cancelled their ride request!");
+    })
 });
 
 const PORT = process.env.PORT || 8080;
