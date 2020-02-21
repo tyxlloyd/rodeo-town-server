@@ -20,6 +20,7 @@ io.on('connection', socket => {
         console.log("Requests in queue: " + queue.length);
         //io.emit('queue size', queue.length);
     }),
+    
     socket.on('customer request', request => {
         var socketList = io.sockets.server.eio.clients;
         var requestFound = false;
@@ -37,13 +38,13 @@ io.on('connection', socket => {
         }
 
         if(queue.length == 0 && !requestFound){
-          io.to(request).emit('error', "There aren't any customers waiting. Try again in a bit");
+          io.to(request.id).emit('error', "There aren't any customers waiting. Try again in a bit");
         }
         else{
-          io.to(request).emit('ride request', selectedRequest);
+          io.to(request.id).emit('ride request', selectedRequest);
           var response = {
-            message: "Your taxi is on the way!",
-            driverID: request,
+            taxiNumber: request.taxiNumber,
+            driverID: request.id,
           }
           io.to(selectedRequest.id).emit('confirmation', response);
           console.log("Requests in queue after shift: " + queue.length);
