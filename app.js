@@ -38,7 +38,8 @@ io.on('connection', socket => {
         }
 
         if(queue.length == 0 && !requestFound){
-          io.to(request.id).emit('error', "There aren't any customers waiting. Try again in a bit");
+          var response =  "There aren't any customers waiting. Try again in a bit.";
+          io.to(request.id).emit('empty queue', response);
         }
         else{
           io.to(request.id).emit('ride request', selectedRequest);
@@ -75,6 +76,7 @@ io.on('connection', socket => {
     socket.on('cancel ride request', request => {
       io.to(request).emit('cancel ride', "Your customer has cancelled their ride request!");
     })
+    
 });
 
 const PORT = process.env.PORT || 8080;
