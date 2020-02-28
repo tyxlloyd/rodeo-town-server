@@ -9,16 +9,17 @@ var queue = [];
 
 io.on('connection', socket => {
     console.log('made socket connection');
-    //io.emit('queue size', queue.length);
+    io.emit('queue size', queue.length);
 
-    socket.on('disconnect', function() {
+    socket.on('disconnect', () => {
       console.log('Got disconnect!');
+      io.emit('queue size', queue.length);
     }),
     
     socket.on('ride request', request => {
         queue.push(request);
+        io.emit('queue size', queue.length);
         console.log("Requests in queue: " + queue.length);
-        //io.emit('queue size', queue.length);
     }),
     
     socket.on('customer request', request => {
@@ -40,6 +41,7 @@ io.on('connection', socket => {
         if(queue.length == 0 && !requestFound){
           var response =  "There aren't any customers waiting. Try again in a bit.";
           io.to(request.id).emit('empty queue', response);
+          io.emit('queue size', queue.length);
         }
         else{
           io.to(request.id).emit('ride request', selectedRequest);
@@ -48,13 +50,9 @@ io.on('connection', socket => {
             driverID: request.id,
           }
           io.to(selectedRequest.id).emit('confirmation', response);
+          io.emit('queue size', queue.length);
           console.log("Requests in queue after shift: " + queue.length);
         }
-    }),
-    
-    socket.on('get queue size', request => {
-      console.log("Someone has requested the queue size.");
-      io.to(request).emit('queue size', queue.length);
     }),
 
     socket.on('get driver location', request => {
@@ -65,16 +63,16 @@ io.on('connection', socket => {
       io.to(request.customerID).emit('request customer location', request.driverID);
     }),
     
-    socket.on('recieve driver location', request => {
-      io.to(request.customerID).emit('recieve driver location', request.driverLocation);
+    socket.on('receive driver location', request => {
+      io.to(request.customerID).emit('receive driver location', request.driverLocation);
     }),
     
-    socket.on('recieve customer location', request => {
-      io.to(request.driverID).emit('recieve customer location', request.customerLocation);
+    socket.on('receive customer location', request => {
+      io.to(request.driverID).emit('receive customer location', request.customerLocation);
     }),
     
     socket.on('cancel ride request', request => {
-      io.to(request).emit('cancel ride', "Your customer has cancelled their ride request!");
+      io.to(request).emit('cancel ride', "Ride request cancelled");
     })
     
 });
