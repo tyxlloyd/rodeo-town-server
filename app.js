@@ -48,6 +48,7 @@ io.on('connection', socket => {
           var response = {
             taxiNumber: request.taxiNumber,
             driverID: request.id,
+            phoneNumber: request.phoneNumber,
           }
           io.to(selectedRequest.id).emit('confirmation', response);
           io.emit('queue size', queue.length);
